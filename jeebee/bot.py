@@ -44,7 +44,11 @@ async def on_message(message):
                 response = jeebee.gb.get_current_active_match()
             embed = discord.Embed()
             for field in response:
-                embed.add_field(name=field["name"], value=field["value"], inline=field.get("inline", False))
+                embed.add_field(
+                    name=field["name"],
+                    value=field["value"],
+                    inline=field.get("inline", False),
+                )
             await message.channel.send(embed=embed)
 
         if "test" in message.content:

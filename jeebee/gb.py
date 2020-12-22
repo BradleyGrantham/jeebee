@@ -59,17 +59,36 @@ def get_current_active_match():
     current_match = get_matches_from_gb(all_match_pages=False)[0]
 
     if current_match["match"]["status"] == "COMPLETED":
-        return [{"name": "**Next match** :video_game:", "value": "[No pending matches.](https://gamebattles.majorleaguegaming.com/x-play/black-ops-cold-war/ladder/squads-eu/match-finder)"}]
+        return [
+            {
+                "name": "**Next match** :video_game:",
+                "value": "[No pending matches.](https://gamebattles.majorleaguegaming.com/x-play/black-ops-cold-war/ladder/squads-eu/match-finder)",
+            }
+        ]
 
     if current_match["match"]["status"] == "ACTIVE":
         match_info = get_match_info(current_match)
 
         fields = [
-            {"name": "**Next match** :video_game:", "value": f"[**{match_info['match_time']}**](https://gamebattles.majorleaguegaming.com/x-play/black-ops-cold-war/team/{GB_TEAM_ID}/match/{match_info['match_id']})"},
-            {"name": "**Opposition** :right_facing_fist:", "value": f"[**{match_info['oppostion_team_name']}**](https://gamebattles.majorleaguegaming.com/x-play/black-ops-cold-war/team/{match_info['oppostion_team_id']})\nRank: {match_info['opposition_rank']:,}\nCurrent streak: {match_info['opposition_streak']} :fire:"},
+            {
+                "name": "**Next match** :video_game:",
+                "value": f"[**{match_info['match_time']}**](https://gamebattles.majorleaguegaming.com/x-play/black-ops-cold-war/team/{GB_TEAM_ID}/match/{match_info['match_id']})",
+            },
+            {
+                "name": "**Opposition** :right_facing_fist:",
+                "value": f"[**{match_info['oppostion_team_name']}**](https://gamebattles.majorleaguegaming.com/x-play/black-ops-cold-war/team/{match_info['oppostion_team_id']})\nRank: {match_info['opposition_rank']:,}\nCurrent streak: {match_info['opposition_streak']} :fire:",
+            },
             {"name": "**Maps** :map:", "value": f"{match_info['maps']}"},
-            {"name": "**Roster**", "value": "\n".join(p[0] for p in match_info['opposition_team_roster']), "inline": True},
-            {"name": "**Ranks**", "value": "\n".join(p[1] for p in match_info['opposition_team_roster']), "inline": True},
+            {
+                "name": "**Roster**",
+                "value": "\n".join(p[0] for p in match_info["opposition_team_roster"]),
+                "inline": True,
+            },
+            {
+                "name": "**Ranks**",
+                "value": "\n".join(p[1] for p in match_info["opposition_team_roster"]),
+                "inline": True,
+            },
         ]
         return fields
 
@@ -85,12 +104,29 @@ def get_last_completed_match():
     match_info = get_match_info(current_match)
 
     fields = [
-        {"name": "**Last match** :video_game:", "value": f"[**{match_info['match_time']}**](https://gamebattles.majorleaguegaming.com/x-play/black-ops-cold-war/team/{GB_TEAM_ID}/match/{match_info['match_id']})"},
-        {"name": "**Result**", "value": f"{':poo: Loss!' if not match_info['won'] else ':trophy: Win!'}"},
-        {"name": "**Opposition** :right_facing_fist:", "value": f"[**{match_info['oppostion_team_name']}**](https://gamebattles.majorleaguegaming.com/x-play/black-ops-cold-war/team/{match_info['oppostion_team_id']})\nRank: {match_info['opposition_rank']:,}\nCurrent streak: {match_info['opposition_streak']} :fire:"},
+        {
+            "name": "**Last match** :video_game:",
+            "value": f"[**{match_info['match_time']}**](https://gamebattles.majorleaguegaming.com/x-play/black-ops-cold-war/team/{GB_TEAM_ID}/match/{match_info['match_id']})",
+        },
+        {
+            "name": "**Result**",
+            "value": f"{':poo: Loss!' if not match_info['won'] else ':trophy: Win!'}",
+        },
+        {
+            "name": "**Opposition** :right_facing_fist:",
+            "value": f"[**{match_info['oppostion_team_name']}**](https://gamebattles.majorleaguegaming.com/x-play/black-ops-cold-war/team/{match_info['oppostion_team_id']})\nRank: {match_info['opposition_rank']:,}\nCurrent streak: {match_info['opposition_streak']} :fire:",
+        },
         {"name": "**Maps** :map:", "value": f"{match_info['maps']}"},
-        {"name": "**Roster**", "value": "\n".join(p[0] for p in match_info['opposition_team_roster']), "inline": True},
-        {"name": "**Ranks**", "value": "\n".join(p[1] for p in match_info['opposition_team_roster']), "inline": True},
+        {
+            "name": "**Roster**",
+            "value": "\n".join(p[0] for p in match_info["opposition_team_roster"]),
+            "inline": True,
+        },
+        {
+            "name": "**Ranks**",
+            "value": "\n".join(p[1] for p in match_info["opposition_team_roster"]),
+            "inline": True,
+        },
     ]
     return fields
 
@@ -109,15 +145,16 @@ def get_match_info(match):
     d["oppostion_team_id"] = match["match"][f"{home_or_visitor}TeamId"]
     d["oppostion_team_name"] = match[f"{home_or_visitor}TeamCard"]["name"]
 
-
     match_details = get_match_details(d["match_id"])
     d["opposition_team_roster"] = [
-        (p['guid'], f"{p['rank']['rank']:,}")
+        (p["guid"], f"{p['rank']['rank']:,}")
         for p in match_details["visitorTeamDetails"]["roster"]
     ]
     d["maps"] = "\n".join([map["map"]["title"] for map in match_details["mapModes"]])
     d["opposition_rank"] = match_details["visitorTeamDetails"]["teamStanding"]["rank"]
-    d["opposition_streak"] = match_details["visitorTeamDetails"]["teamStanding"]["streak"]["current"]
+    d["opposition_streak"] = match_details["visitorTeamDetails"]["teamStanding"][
+        "streak"
+    ]["current"]
 
     d["won"] = match_details.get("results", dict()).get("winningTeamId") == GB_TEAM_ID
 

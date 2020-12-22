@@ -3,4 +3,4 @@ GB_MATCHES_URL = "https://gb-api.majorleaguegaming.com/api/web/v1/team-matches-s
 GB_MATCH_DETAILS_URL = (
     "https://gb-api.majorleaguegaming.com/api/web/v1/match-screen/{match_id}"
 )
-INVISIBLE_SPACE = '\u200B'
+INVISIBLE_SPACE = "\u200B"
