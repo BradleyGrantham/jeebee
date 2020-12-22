@@ -119,7 +119,7 @@ def get_last_completed_match():
         {"name": "**Maps** :map:", "value": f"{match_info['maps']}"},
         {
             "name": "**Roster**",
-            "value": "\n".join(f"[{p[0]}](http://profile.majorleaguegaming.com/{p[3]})" for p in match_info["opposition_team_roster"]),
+            "value": "\n".join(f"[{p[0]}](http://profile.majorleaguegaming.com/{p[2]})" for p in match_info["opposition_team_roster"]),
             "inline": True,
         },
         {
