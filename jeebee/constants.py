@@ -3,4 +3,7 @@ GB_MATCHES_URL = "https://gb-api.majorleaguegaming.com/api/web/v1/team-matches-s
 GB_MATCH_DETAILS_URL = (
     "https://gb-api.majorleaguegaming.com/api/web/v1/match-screen/{match_id}"
 )
-INVISIBLE_SPACE = "\u200B"
+GB_MATCH_FINDER_URL = "https://gb-api.majorleaguegaming.com/api/v2/challenges/ladder/2492?pageSize=25&page=1"
+GB_MATCH_FINDER_DETAILS_URL = (
+    "https://gb-api.majorleaguegaming.com/api/v1/challenges/{match_id}/fields/public"
+)
