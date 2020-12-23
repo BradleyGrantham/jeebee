@@ -37,7 +37,7 @@ async def on_message(message):
             response = f"{jeebee.gb.get_win_percentage(num_games):.2f}%"
             await message.channel.send(win_perc_str + response)
 
-        if "match" in message.content:
+        elif "match" in message.content:
             if "last" in message.content:
                 response = jeebee.gb.get_last_completed_match()
             else:
@@ -51,11 +51,15 @@ async def on_message(message):
                 )
             await message.channel.send(embed=embed)
 
-        if "test" in message.content:
+        elif "test" in message.content:
             response = discord.Embed()
             response.title = "hello"
             response.url = "https://news.ycombinator.com"
             await message.channel.send(embed=response)
+
+        else:
+            response = "Sorry, I don't understand ¯\_(ツ)_/¯"
+            await message.channel.send(response)
 
 
 client.run(TOKEN)
