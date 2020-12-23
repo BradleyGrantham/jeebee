@@ -24,17 +24,32 @@ async def on_message(message):
     if message.content.startswith("jeebee"):
 
         if "win-perc" in message.content:
-            if message.content[-1].isdigit():
-                num_games = int(message.content.split(" ")[-1])
-            else:
+            message_split = message.content.split(" ")
+            message_len = len(message_split)
+            if message_len == 2:
                 num_games = None
+                player = None
+            elif message_len == 3:
+                if all(c.isdigit() for c in message_split[-1]):
+                    num_games = int(message_split[-1])
+                    player = None
+                else:
+                    num_games = None
+                    player = message_split[-1]
+            else:
+                if all(c.isdigit() for c in message_split[-1]):
+                    num_games = int(message_split[-1])
+                    player = message_split[-2]
+                else:
+                    num_games = int(message_split[-2])
+                    player = message_split[-1]
 
             win_perc_str = (
                 "All time win percentage: "
                 if num_games is None
                 else f"Win percentage over last {num_games} games: "
             )
-            response = f"{jeebee.gb.get_win_percentage(num_games):.2f}%"
+            response = f"{jeebee.gb.get_win_percentage(num_games, player):.2f}%"
             await message.channel.send(win_perc_str + response)
 
         if "match" in message.content:

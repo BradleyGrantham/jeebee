@@ -31,19 +31,47 @@ def get_matches_from_gb(all_match_pages: Optional[bool] = True):
     return matches
 
 
-def get_win_percentage(n: Optional[int] = None):
+def get_wins_and_rosters(matches):
+
+    match_details_url = "https://gb-api.majorleaguegaming.com/api/web/v1/match-screen/{match_id}"
+    new_matches = []
+    for match in matches:
+        match_details = requests.get(match_details_url.format(match_id=match["match"]["id"])).json()
+        new_matches.append({**match, **match_details["body"]})
+
+    wins_and_rosters = []
+    for match in matches:
+        try:
+            details = "homeTeamDetails" if match["match"]["homeTeamId"] == GB_TEAM_ID else "visitorTeamDetails"
+            roster = [match_player["matchPlayer"]["username"] for match_player in match[details]["roster"]]
+            match["roster"] = roster
+        except KeyError:
+            pass
+    return matches
+
+
+def get_win_percentage(n: Optional[int] = None, player: Optional[str] = None):
     """Get the win percentage over the last n games (all games if n is None)."""
     matches = get_matches_from_gb()
-    print(len(matches))
+
     if n is not None:
         matches = matches[:n]
 
     wins = 0
+    match_num = 0
     for match in matches:
-        if match.get("winningTeamId", 0) == GB_TEAM_ID:
-            wins += 1
+        if player is None:
+            match_num += 1
+            if match.get("winningTeamId", 0) == GB_TEAM_ID:
+                wins += 1
+        else:
+            roster = [x[-1] for x in get_match_info(match)["we_rush_a_roster"]]
+            if player in roster:
+                match_num += 1
+                if match.get("winningTeamId", 0) == GB_TEAM_ID:
+                    wins += 1
 
-    return (wins / len(matches)) * 100
+    return (wins / match_num) * 100
 
 
 def get_match_details(match_id: int):
@@ -139,20 +167,27 @@ def get_match_info(match):
         match["match"]["playTime"]
     ).strftime("%Y-%m-%d %H:%M")
 
-    home_or_visitor = (
+    opposition_home_or_visitor = (
         "home" if match["match"]["homeTeamId"] != GB_TEAM_ID else "visitor"
     )
-    d["oppostion_team_id"] = match["match"][f"{home_or_visitor}TeamId"]
-    d["oppostion_team_name"] = match[f"{home_or_visitor}TeamCard"]["name"]
+    we_rush_a_home_or_visitor = (
+        "home" if match["match"]["homeTeamId"] == GB_TEAM_ID else "visitor"
+    )
+    d["oppostion_team_id"] = match["match"][f"{opposition_home_or_visitor}TeamId"]
+    d["oppostion_team_name"] = match[f"{opposition_home_or_visitor}TeamCard"]["name"]
 
     match_details = get_match_details(d["match_id"])
     d["opposition_team_roster"] = [
-        (p["guid"], f"{p['rank']['rank']:,}", p["matchPlayer"]["username"])
-        for p in match_details["visitorTeamDetails"]["roster"]
+        (p.get("guid", ""), f"{p['rank']['rank']:,}", p["matchPlayer"]["username"])
+        for p in match_details[f"{opposition_home_or_visitor}TeamDetails"]["roster"]
+    ]
+    d["we_rush_a_roster"] = [
+        (p.get("guid", ""), f"{p['rank']['rank']:,}", p["matchPlayer"]["username"])
+        for p in match_details[f"{we_rush_a_home_or_visitor}TeamDetails"]["roster"]
     ]
     d["maps"] = "\n".join([map["map"]["title"] for map in match_details["mapModes"]])
-    d["opposition_rank"] = match_details["visitorTeamDetails"]["teamStanding"]["rank"]
-    d["opposition_streak"] = match_details["visitorTeamDetails"]["teamStanding"][
+    d["opposition_rank"] = match_details[f"{opposition_home_or_visitor}TeamDetails"]["teamStanding"]["rank"]
+    d["opposition_streak"] = match_details[f"{opposition_home_or_visitor}TeamDetails"]["teamStanding"][
         "streak"
     ]["current"]
 
