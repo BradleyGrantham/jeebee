@@ -18,16 +18,16 @@ def get_matches_from_gb(all_match_pages: Optional[bool] = True):
     )
     matches = r.json()["body"]["records"]
 
-    if not all_match_pages:
-        return matches
-
-    for page_number in range(2, r.json()["body"]["totalPages"]):
-        r = requests.get(
-            jeebee.constants.GB_MATCHES_URL.format(
-                team_id=GB_TEAM_ID, page_number=page_number
+    if all_match_pages:
+        for page_number in range(2, r.json()["body"]["totalPages"]):
+            r = requests.get(
+                jeebee.constants.GB_MATCHES_URL.format(
+                    team_id=GB_TEAM_ID, page_number=page_number
+                )
             )
-        )
-        matches += r.json()["body"]["records"]
+            matches += r.json()["body"]["records"]
+
+    matches = sorted(matches, key=lambda x: x["match"]["playTime"], reverse=True)
     return matches
 
 
