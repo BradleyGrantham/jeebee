@@ -4,24 +4,20 @@ from typing import Optional
 import requests
 
 import jeebee.constants
+import jeebee._payloads
 from jeebee.log import logger
+from jeebee.gb_login import gb_session
 
 
 def get_matches_from_gb(all_match_pages: Optional[bool] = True):
     """Get matches for the GameBattles team with id GB_TEAM_ID."""
-    r = requests.get(
-        jeebee.constants.GB_MATCHES_URL.format(
-            team_id=jeebee.constants.GB_TEAM_ID, page_number=1
-        )
-    )
+    r = requests.get(jeebee.constants.GB_MATCHES_URL.format(page_number=1))
     matches = r.json()["body"]["records"]
 
     if all_match_pages:
         for page_number in range(2, r.json()["body"]["totalPages"]):
             r = requests.get(
-                jeebee.constants.GB_MATCHES_URL.format(
-                    team_id=jeebee.constants.GB_TEAM_ID, page_number=page_number
-                )
+                jeebee.constants.GB_MATCHES_URL.format(page_number=page_number)
             )
             matches += r.json()["body"]["records"]
 
@@ -102,7 +98,7 @@ def get_current_active_match():
             }
         ]
 
-    else:
+    if current_match["match"]["status"] in ("ACTIVE", "PENDING"):
         logger.info(f"Match status: {current_match['match']['status']}")
         match_info = get_match_info(current_match)
 
@@ -326,3 +322,51 @@ def find_matches(all_matches=False, kbm_only=True):
     ]
 
     return fields
+
+
+def get_team_members():
+    r = requests.get(jeebee.constants.GB_TEAM_MEMBERS_URL)
+    team_members = r.json()["body"]
+    team_members = {player["username"].lower(): player["id"] for player in team_members}
+    return team_members
+
+
+def convert_usernames_to_ids(roster):
+    team_member_ids = get_team_members()
+    roster = [player.lower() for player in roster]
+    roster_ids = [team_member_ids[player] for player in roster]
+    assert len(roster) == len(roster_ids)
+    return roster_ids
+
+
+def post_match(roster: tuple):
+    try:
+        roster = convert_usernames_to_ids(roster)
+    except KeyError:
+        return [
+            {
+                "name": "**I can't find all of the usernames you entered** :cry:",
+                "value": "[Match finder.](https://gamebattles.majorleaguegaming.com/x-play/black-ops-cold-war/ladder/squads-eu/match-finder)",
+            }
+        ]
+    data = jeebee._payloads.CHALLENGE_PAYLOAD
+    data["players"] = len(roster)
+    data["roster"] = roster
+    r = gb_session.post(
+        "https://gb-api.majorleaguegaming.com/api/v1/challenges", json=data
+    )
+    logger.info(r.content)
+    if r.status_code != 200:
+        return [
+            {
+                "name": "**There has been an issue** :cry:",
+                "value": "[Match finder.](https://gamebattles.majorleaguegaming.com/x-play/black-ops-cold-war/ladder/squads-eu/match-finder)",
+            }
+        ]
+
+    return [
+        {
+            "name": "**Match posted** :clock230:",
+            "value": "[Waiting to be accepted.](https://gamebattles.majorleaguegaming.com/x-play/black-ops-cold-war/ladder/squads-eu/match-finder)",
+        }
+    ]
