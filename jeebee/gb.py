@@ -2,15 +2,17 @@ import datetime
 from typing import Optional
 
 import requests
-from loguru import logger
 
 import jeebee.constants
+from jeebee.log import logger
 
 
 def get_matches_from_gb(all_match_pages: Optional[bool] = True):
     """Get matches for the GameBattles team with id GB_TEAM_ID."""
     r = requests.get(
-        jeebee.constants.GB_MATCHES_URL.format(team_id=jeebee.constants.GB_TEAM_ID, page_number=1)
+        jeebee.constants.GB_MATCHES_URL.format(
+            team_id=jeebee.constants.GB_TEAM_ID, page_number=1
+        )
     )
     matches = r.json()["body"]["records"]
 
@@ -181,10 +183,14 @@ def get_match_info(match):
     ).strftime("%Y-%m-%d %H:%M")
 
     opposition_home_or_visitor = (
-        "home" if match["match"]["homeTeamId"] != jeebee.constants.GB_TEAM_ID else "visitor"
+        "home"
+        if match["match"]["homeTeamId"] != jeebee.constants.GB_TEAM_ID
+        else "visitor"
     )
     we_rush_a_home_or_visitor = (
-        "home" if match["match"]["homeTeamId"] == jeebee.constants.GB_TEAM_ID else "visitor"
+        "home"
+        if match["match"]["homeTeamId"] == jeebee.constants.GB_TEAM_ID
+        else "visitor"
     )
     d["oppostion_team_id"] = match["match"][f"{opposition_home_or_visitor}TeamId"]
     d["oppostion_team_name"] = match[f"{opposition_home_or_visitor}TeamCard"]["name"]
@@ -206,7 +212,10 @@ def get_match_info(match):
         "teamStanding"
     ]["streak"]["current"]
 
-    d["won"] = match_details.get("results", dict()).get("winningTeamId") == jeebee.constants.GB_TEAM_ID
+    d["won"] = (
+        match_details.get("results", dict()).get("winningTeamId")
+        == jeebee.constants.GB_TEAM_ID
+    )
 
     return d
 

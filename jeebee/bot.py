@@ -16,7 +16,8 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    if message.content.startswith("jeebee"):
+    if "jeebee" in message.content:
+        embed = discord.Embed()
 
         try:
 
@@ -39,7 +40,6 @@ async def on_message(message):
                     response = jeebee.gb.get_last_completed_match()
                 else:
                     response = jeebee.gb.get_current_active_match()
-                embed = discord.Embed()
                 for field in response:
                     embed.add_field(
                         name=field["name"],
@@ -59,7 +59,6 @@ async def on_message(message):
                     response = jeebee.gb.find_matches(all_matches=False, kbm_only=True)
                 else:
                     response = jeebee.gb.find_matches(all_matches=False, kbm_only=False)
-                embed = discord.Embed()
                 for field in response:
                     embed.add_field(
                         name=field["name"],
@@ -73,15 +72,15 @@ async def on_message(message):
                 await message.channel.send(embed=embed)
 
             elif "test" in message.content:
-                response = discord.Embed()
 
-                response.title = "hello"
-                response.url = "https://news.ycombinator.com"
-                await message.channel.send(embed=response)
+                embed.title = "hello"
+                embed.url = "https://news.ycombinator.com"
+                await message.channel.send(embed=embed)
 
             else:
                 response = "Sorry, I don't understand ¯\_(ツ)_/¯"
                 await message.channel.send(response)
+
         except Exception as e:
             response = "There's been an error :cry:"
             await message.channel.send(response)
