@@ -217,7 +217,7 @@ def get_match_info(match):
     return d
 
 
-def find_matches(all_matches=False, kbm_only=True):
+def find_matches(all_matches=False, kbm_only=True, return_fields=True):
     r = requests.get(jeebee.constants.GB_MATCH_FINDER_URL)
     available_matches = r.json()["body"]["records"]
     available_matches_with_details = []
@@ -266,6 +266,9 @@ def find_matches(all_matches=False, kbm_only=True):
                 for match in available_matches_with_details
                 if match.get("Input Type") == "Any"
             ]
+
+    if not return_fields:
+        return available_matches_with_details
 
     if not available_matches_with_details:
         return [
@@ -369,5 +372,42 @@ def post_match(roster: tuple):
         {
             "name": "**Match posted** :clock230:",
             "value": "[Waiting to be accepted.](https://gamebattles.majorleaguegaming.com/x-play/black-ops-cold-war/ladder/squads-eu/match-finder)",
+        }
+    ]
+
+
+def accept_match(roster, kbm_only=False):
+    roster = convert_usernames_to_ids(roster)
+
+    matches = find_matches(kbm_only=kbm_only, return_fields=False)
+    matches = [match for match in matches if match["players"] == len(roster)]
+    matches = sorted(matches, key=lambda x: x["disputePercentage"])
+    if not matches:
+        return [
+            {
+                "name": "**There aren't any suitable matches** :interrobang:",
+                "value": "Type jeebee post <usernames> to put a match up",
+            }
+        ]
+    match_id = matches[0]["id"]
+    data = jeebee._payloads.ACCEPT_CHALLENGE_PAYLOAD
+    data["roster"] = roster
+
+    r = gb_session.put(
+        f"https://gb-api.majorleaguegaming.com/api/v1/challenges/{match_id}/accept", json=data
+    )
+    logger.info(r.content)
+    if r.status_code != 200:
+        return [
+            {
+                "name": "**There has been an issue** :cry:",
+                "value": "[Match finder.](https://gamebattles.majorleaguegaming.com/x-play/black-ops-cold-war/ladder/squads-eu/match-finder)",
+            }
+        ]
+
+    return [
+        {
+            "name": "**Match accepted** :mechanical_arm:",
+            "value": "Type jeebee match to see match details",
         }
     ]

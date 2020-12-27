@@ -8,9 +8,11 @@ TOKEN = os.getenv("DISCORD_TOKEN")
 USERNAME = os.getenv("MLG_USERNAME")
 PASSWORD = os.getenv("MLG_PASSWORD")
 
-if os.getenv("ENV") == "production":
+ENV = os.getenv("ENV")
+
+if ENV == "production":
     GB_TEAM_ID = 35017683
-elif os.getenv("ENV") == "development":
+elif ENV == "development":
     GB_TEAM_ID = 35286312
 
 # GB_CONSTANTS
