@@ -89,8 +89,9 @@ def get_match_details(match_id: int):
 def get_current_active_match():
     """Get the current active match from GameBattles."""
     current_match = get_matches_from_gb(all_match_pages=False)[0]
+    logger.info(f"Match status: {current_match['match']['status']}")
 
-    if current_match["match"]["status"] == "COMPLETED":
+    if current_match["match"]["status"] in ("COMPLETED", "DISPUTED"):
         return [
             {
                 "name": "**Next match** :video_game:",
@@ -99,7 +100,7 @@ def get_current_active_match():
         ]
 
     if current_match["match"]["status"] in ("ACTIVE", "PENDING"):
-        logger.info(f"Match status: {current_match['match']['status']}")
+
         match_info = get_match_info(current_match)
 
         fields = [
