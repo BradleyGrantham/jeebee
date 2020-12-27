@@ -130,7 +130,7 @@ async def accept(ctx, *args):
     async with ctx.typing():
         if len(roster) < 3 or len(roster) > 4:
             await ctx.send(
-                "You need to give me at least 3 (and no more than 4) GameBattles usernames\ne.g. jeebee post ntsfbrad JaAnTr JIMBOB108"
+                "You need to give me at least 3 (and no more than 4) GameBattles usernames\ne.g. jeebee accept ntsfbrad JaAnTr JIMBOB108"
             )
             return
         else:
