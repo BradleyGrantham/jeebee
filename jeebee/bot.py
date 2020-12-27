@@ -1,90 +1,101 @@
+from typing import Optional
+
 import discord
+from discord.ext import commands
 
 import jeebee.gb
 from jeebee.constants import TOKEN
+from jeebee.log import logger
 
-client = discord.Client()
+
+bot = commands.Bot(command_prefix="jeebee ")
 
 
-@client.event
+@bot.event
 async def on_ready():
-    print(f"{client.user.name} has connected to Discord!")
+    print(f"{bot.user.name} has connected to Discord!")
 
 
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
+@bot.event
+async def on_command_error(ctx, error):
+    async with ctx.typing():
+        if isinstance(error, commands.CommandNotFound):
+            msg = "Sorry, I don't understand ¯\_(ツ)_/¯"
 
-    if "jeebee" in message.content:
+        else:
+            msg = "Sorry, it looks like there been an error :cry:"
+    await ctx.send(msg)
+
+
+@bot.command(name="win-perc")
+async def win_perc(ctx, num_games: Optional[int] = None):
+    async with ctx.typing():
+        win_perc_str = (
+            "All time win percentage: "
+            if num_games is None
+            else f"Win percentage over last {num_games} games: "
+        )
+        response = f"{jeebee.gb.get_win_percentage(num_games):.2f}%"
+    await ctx.send(win_perc_str + response)
+
+
+@bot.group()
+async def match(ctx):
+    async with ctx.typing():
+        if ctx.invoked_subcommand is None:
+            embed = discord.Embed()
+            response = jeebee.gb.get_current_active_match()
+            for field in response:
+                embed.add_field(
+                    name=field["name"],
+                    value=field["value"],
+                    inline=field.get("inline", False),
+                )
+            embed.set_footer(
+                text="jeebee",
+                icon_url="https://gamebattles.majorleaguegaming.com/gb-web/assets/favicon.ico",
+            )
+            await ctx.send(embed=embed)
+
+
+@match.command()
+async def last(ctx):
+    async with ctx.typing():
         embed = discord.Embed()
-
-        try:
-
-            if "win-perc" in message.content:
-                if message.content[-1].isdigit():
-                    num_games = int(message.content.split(" ")[-1])
-                else:
-                    num_games = None
-
-                win_perc_str = (
-                    "All time win percentage: "
-                    if num_games is None
-                    else f"Win percentage over last {num_games} games: "
-                )
-                response = f"{jeebee.gb.get_win_percentage(num_games):.2f}%"
-                await message.channel.send(win_perc_str + response)
-
-            elif "match" in message.content:
-                if "last" in message.content:
-                    response = jeebee.gb.get_last_completed_match()
-                else:
-                    response = jeebee.gb.get_current_active_match()
-                for field in response:
-                    embed.add_field(
-                        name=field["name"],
-                        value=field["value"],
-                        inline=field.get("inline", False),
-                    )
-                embed.set_footer(
-                    text="jeebee",
-                    icon_url="https://gamebattles.majorleaguegaming.com/gb-web/assets/favicon.ico",
-                )
-                await message.channel.send(embed=embed)
-
-            elif "find" in message.content:
-                if message.content.split(" ")[-1] == "all":
-                    response = jeebee.gb.find_matches(all_matches=True, kbm_only=False)
-                elif message.content.split(" ")[-1] == "kbm":
-                    response = jeebee.gb.find_matches(all_matches=False, kbm_only=True)
-                else:
-                    response = jeebee.gb.find_matches(all_matches=False, kbm_only=False)
-                for field in response:
-                    embed.add_field(
-                        name=field["name"],
-                        value=field["value"],
-                        inline=field.get("inline", False),
-                    )
-                embed.set_footer(
-                    text="jeebee",
-                    icon_url="https://gamebattles.majorleaguegaming.com/gb-web/assets/favicon.ico",
-                )
-                await message.channel.send(embed=embed)
-
-            elif "test" in message.content:
-
-                embed.title = "hello"
-                embed.url = "https://news.ycombinator.com"
-                await message.channel.send(embed=embed)
-
-            else:
-                response = "Sorry, I don't understand ¯\_(ツ)_/¯"
-                await message.channel.send(response)
-
-        except Exception as e:
-            response = "There's been an error :cry:"
-            await message.channel.send(response)
-            # raise e
+        response = jeebee.gb.get_last_completed_match()
+        for field in response:
+            embed.add_field(
+                name=field["name"],
+                value=field["value"],
+                inline=field.get("inline", False),
+            )
+        embed.set_footer(
+            text="jeebee",
+            icon_url="https://gamebattles.majorleaguegaming.com/gb-web/assets/favicon.ico",
+        )
+    await ctx.send(embed=embed)
 
 
-client.run(TOKEN)
+@bot.command()
+async def find(ctx, *args):
+    embed = discord.Embed()
+    async with ctx.typing():
+        logger.info(args)
+        all_matches = True if "all" in args else False
+        kbm_only = True if "kbm" in args else False
+        response = jeebee.gb.find_matches(all_matches=all_matches, kbm_only=kbm_only)
+
+        for field in response:
+            embed.add_field(
+                name=field["name"],
+                value=field["value"],
+                inline=field.get("inline", False),
+            )
+        embed.set_footer(
+            text="jeebee",
+            icon_url="https://gamebattles.majorleaguegaming.com/gb-web/assets/favicon.ico",
+        )
+    await ctx.send(embed=embed)
+
+
+bot.run(TOKEN)

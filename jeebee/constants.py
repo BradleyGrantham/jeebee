@@ -18,4 +18,5 @@ GB_MATCH_FINDER_DETAILS_URL = (
 if os.getenv("ENV") == "production":
     GB_TEAM_ID = 35017683
 elif os.getenv("ENV") == "development":
-    GB_TEAM_ID = 35286312
+    # GB_TEAM_ID = 35286312
+    GB_TEAM_ID = 35017683
