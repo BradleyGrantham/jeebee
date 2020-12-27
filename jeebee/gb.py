@@ -343,7 +343,7 @@ def convert_usernames_to_ids(roster):
     return roster_ids
 
 
-def post_match(roster: tuple):
+def post_match(roster: tuple, kbm_only=False):
     try:
         roster = convert_usernames_to_ids(roster)
     except KeyError:
@@ -356,6 +356,14 @@ def post_match(roster: tuple):
     data = jeebee._payloads.CHALLENGE_PAYLOAD
     data["players"] = len(roster)
     data["roster"] = roster
+
+    if kbm_only:
+        data["fields"] = [
+            {"id": 62744, "value": ["Use GB Variant Gameplay"]},
+            {"id": 62749, "value": ["Allowed"]},
+            {"id": 62750, "value": ["Any"]},
+        ]
+
     r = gb_session.post(
         "https://gb-api.majorleaguegaming.com/api/v1/challenges", json=data
     )
@@ -402,7 +410,8 @@ def accept_match(roster, kbm_only=False):
     data["roster"] = roster
 
     r = gb_session.put(
-        f"https://gb-api.majorleaguegaming.com/api/v1/challenges/{match_id}/accept", json=data
+        f"https://gb-api.majorleaguegaming.com/api/v1/challenges/{match_id}/accept",
+        json=data,
     )
     logger.info(r.content)
     if r.status_code != 200:
@@ -426,6 +435,6 @@ def report_last_match(win: bool):
     match_id = match["id"]
     r = gb_session.post(
         f"https://gb-api.majorleaguegaming.com/api/v1/matches/{match_id}/report",
-        json={"reportTeamStatus": "WON" if win else "LOST"}
+        json={"reportTeamStatus": "WON" if win else "LOST"},
     )
     return True if r.status_code == 200 else False

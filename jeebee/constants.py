@@ -6,7 +6,6 @@ dotenv.load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 
 
-
 ENV = os.getenv("ENV")
 
 if ENV == "production":

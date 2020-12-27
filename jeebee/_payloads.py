@@ -25,7 +25,7 @@ CHALLENGE_PAYLOAD = {
     "fields": [
         {"id": 62744, "value": ["Use GB Variant Gameplay"]},
         {"id": 62749, "value": ["Allowed"]},
-        {"id": 62750, "value": ["Any"]},
+        {"id": 62750, "value": ["Controller Only"]},
     ],
     "premiumOnly": False,
     "roster": [],
@@ -34,7 +34,6 @@ CHALLENGE_PAYLOAD = {
 }
 
 ACCEPT_CHALLENGE_PAYLOAD = {"acceptingTeamId": 35286312, "maps": [], "roster": []}
-
 
 
 LOGIN_PAYLOAD = payload = {

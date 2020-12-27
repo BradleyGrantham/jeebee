@@ -6,9 +6,16 @@ from discord.ext import commands
 import jeebee.gb
 from jeebee.constants import TOKEN
 from jeebee.log import logger
+from jeebee.help_msg import help_msg
 
 
 bot = commands.Bot(command_prefix="jeebee ")
+bot.remove_command("help")
+
+
+@bot.command(name="help")
+async def _help(ctx):
+    await ctx.send(help_msg)
 
 
 @bot.event
@@ -56,6 +63,7 @@ async def match(ctx):
                 icon_url="https://gamebattles.majorleaguegaming.com/gb-web/assets/favicon.ico",
             )
             await ctx.send(embed=embed)
+            return
 
 
 @match.command()
@@ -101,6 +109,8 @@ async def find(ctx, *args):
 @bot.command()
 async def post(ctx, *args):
     async with ctx.typing():
+        kbm_only = True if "kbm" in args else False
+        roster = [a for a in args if a != "kbm"]
         if len(args) < 3 or len(args) > 4:
             await ctx.send(
                 "You need to give me at least 3 (and no more than 4) GameBattles usernames\ne.g. jeebee post ntsfbrad JaAnTr JIMBOB108"
@@ -108,7 +118,7 @@ async def post(ctx, *args):
             return
         else:
             embed = discord.Embed()
-            response = jeebee.gb.post_match(args)
+            response = jeebee.gb.post_match(roster, kbm_only=kbm_only)
             for field in response:
                 embed.add_field(
                     name=field["name"],
@@ -125,9 +135,9 @@ async def post(ctx, *args):
 
 @bot.command()
 async def accept(ctx, *args):
-    kbm_only = True if "kbm" in args else False
-    roster = [a for a in args if a != "kbm"]
     async with ctx.typing():
+        kbm_only = True if "kbm" in args else False
+        roster = [a for a in args if a != "kbm"]
         if len(roster) < 3 or len(roster) > 4:
             await ctx.send(
                 "You need to give me at least 3 (and no more than 4) GameBattles usernames\ne.g. jeebee accept ntsfbrad JaAnTr JIMBOB108"
