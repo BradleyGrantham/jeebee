@@ -150,4 +150,17 @@ async def accept(ctx, *args):
             return
 
 
+@bot.command()
+async def report(ctx, win):
+    win = True if win in ("w", "win", "wi", "victory", "dub") else False
+    async with ctx.typing():
+        response = jeebee.gb.report_last_match(win)
+        if response:
+            await ctx.send("Reported. :slight_smile:")
+            return
+        else:
+            await ctx.send("Sorry, it looks like there been an error :cry:")
+            return
+
+
 bot.run(TOKEN)
