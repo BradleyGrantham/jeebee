@@ -1,20 +1,16 @@
 import datetime
-import os
 from typing import Optional
 
-import dotenv
 import requests
+from loguru import logger
 
 import jeebee.constants
-
-dotenv.load_dotenv()
-GB_TEAM_ID = int(os.getenv("GB_TEAM_ID"))
 
 
 def get_matches_from_gb(all_match_pages: Optional[bool] = True):
     """Get matches for the GameBattles team with id GB_TEAM_ID."""
     r = requests.get(
-        jeebee.constants.GB_MATCHES_URL.format(team_id=GB_TEAM_ID, page_number=1)
+        jeebee.constants.GB_MATCHES_URL.format(team_id=jeebee.constants.GB_TEAM_ID, page_number=1)
     )
     matches = r.json()["body"]["records"]
 
@@ -22,7 +18,7 @@ def get_matches_from_gb(all_match_pages: Optional[bool] = True):
         for page_number in range(2, r.json()["body"]["totalPages"]):
             r = requests.get(
                 jeebee.constants.GB_MATCHES_URL.format(
-                    team_id=GB_TEAM_ID, page_number=page_number
+                    team_id=jeebee.constants.GB_TEAM_ID, page_number=page_number
                 )
             )
             matches += r.json()["body"]["records"]
@@ -43,12 +39,11 @@ def get_wins_and_rosters(matches):
         ).json()
         new_matches.append({**match, **match_details["body"]})
 
-    wins_and_rosters = []
     for match in matches:
         try:
             details = (
                 "homeTeamDetails"
-                if match["match"]["homeTeamId"] == GB_TEAM_ID
+                if match["match"]["homeTeamId"] == jeebee.constants.GB_TEAM_ID
                 else "visitorTeamDetails"
             )
             roster = [
@@ -73,13 +68,13 @@ def get_win_percentage(n: Optional[int] = None, player: Optional[str] = None):
     for match in matches:
         if player is None:
             match_num += 1
-            if match.get("winningTeamId", 0) == GB_TEAM_ID:
+            if match.get("winningTeamId", 0) == jeebee.constants.GB_TEAM_ID:
                 wins += 1
         else:
             roster = [x[-1] for x in get_match_info(match)["we_rush_a_roster"]]
             if player in roster:
                 match_num += 1
-                if match.get("winningTeamId", 0) == GB_TEAM_ID:
+                if match.get("winningTeamId", 0) == jeebee.constants.GB_TEAM_ID:
                     wins += 1
 
     return (wins / match_num) * 100
@@ -105,13 +100,14 @@ def get_current_active_match():
             }
         ]
 
-    if current_match["match"]["status"] == "ACTIVE":
+    else:
+        logger.info(f"Match status: {current_match['match']['status']}")
         match_info = get_match_info(current_match)
 
         fields = [
             {
                 "name": "**Next match** :video_game:",
-                "value": f"[**{match_info['match_time']}**](https://gamebattles.majorleaguegaming.com/x-play/black-ops-cold-war/team/{GB_TEAM_ID}/match/{match_info['match_id']})",
+                "value": f"[**{match_info['match_time']}**](https://gamebattles.majorleaguegaming.com/x-play/black-ops-cold-war/team/{jeebee.constants.GB_TEAM_ID}/match/{match_info['match_id']})",
             },
             {
                 "name": "**Opposition** :right_facing_fist:",
@@ -120,7 +116,10 @@ def get_current_active_match():
             {"name": "**Maps** :map:", "value": f"{match_info['maps']}"},
             {
                 "name": "**Roster**",
-                "value": "\n".join(p[0] for p in match_info["opposition_team_roster"]),
+                "value": "\n".join(
+                    f"[{p[0]}](http://profile.majorleaguegaming.com/{p[2]})"
+                    for p in match_info["opposition_team_roster"]
+                ),
                 "inline": True,
             },
             {
@@ -145,7 +144,7 @@ def get_last_completed_match():
     fields = [
         {
             "name": "**Last match** :video_game:",
-            "value": f"[**{match_info['match_time']}**](https://gamebattles.majorleaguegaming.com/x-play/black-ops-cold-war/team/{GB_TEAM_ID}/match/{match_info['match_id']})",
+            "value": f"[**{match_info['match_time']}**](https://gamebattles.majorleaguegaming.com/x-play/black-ops-cold-war/team/{jeebee.constants.GB_TEAM_ID}/match/{match_info['match_id']})",
         },
         {
             "name": "**Result**",
@@ -182,10 +181,10 @@ def get_match_info(match):
     ).strftime("%Y-%m-%d %H:%M")
 
     opposition_home_or_visitor = (
-        "home" if match["match"]["homeTeamId"] != GB_TEAM_ID else "visitor"
+        "home" if match["match"]["homeTeamId"] != jeebee.constants.GB_TEAM_ID else "visitor"
     )
     we_rush_a_home_or_visitor = (
-        "home" if match["match"]["homeTeamId"] == GB_TEAM_ID else "visitor"
+        "home" if match["match"]["homeTeamId"] == jeebee.constants.GB_TEAM_ID else "visitor"
     )
     d["oppostion_team_id"] = match["match"][f"{opposition_home_or_visitor}TeamId"]
     d["oppostion_team_name"] = match[f"{opposition_home_or_visitor}TeamCard"]["name"]
@@ -207,7 +206,7 @@ def get_match_info(match):
         "teamStanding"
     ]["streak"]["current"]
 
-    d["won"] = match_details.get("results", dict()).get("winningTeamId") == GB_TEAM_ID
+    d["won"] = match_details.get("results", dict()).get("winningTeamId") == jeebee.constants.GB_TEAM_ID
 
     return d
 
@@ -283,7 +282,7 @@ def find_matches(all_matches=False, kbm_only=True):
 
     fields = [
         {
-            "name": "**Available matches** :palm_tree:",
+            "name": ":palm_tree:",
             "value": "\n".join(
                 str(match["record_num"]) for match in available_matches_with_details
             ),

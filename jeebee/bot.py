@@ -1,12 +1,7 @@
-import os
-
 import discord
-import dotenv
 
 import jeebee.gb
-
-dotenv.load_dotenv()
-TOKEN = os.getenv("DISCORD_TOKEN")
+from jeebee.constants import TOKEN
 
 client = discord.Client()
 
