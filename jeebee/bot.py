@@ -125,15 +125,17 @@ async def post(ctx, *args):
 
 @bot.command()
 async def accept(ctx, *args):
+    kbm_only = True if "kbm" in args else False
+    roster = [a for a in args if a != "kbm"]
     async with ctx.typing():
-        if (len(args) < 3 or len(args) > 4):
+        if len(roster) < 3 or len(roster) > 4:
             await ctx.send(
                 "You need to give me at least 3 (and no more than 4) GameBattles usernames\ne.g. jeebee post ntsfbrad JaAnTr JIMBOB108"
             )
             return
         else:
             embed = discord.Embed()
-            response = jeebee.gb.accept_match(args)
+            response = jeebee.gb.accept_match(args, kbm_only=kbm_only)
             for field in response:
                 embed.add_field(
                     name=field["name"],

@@ -377,7 +377,15 @@ def post_match(roster: tuple):
 
 
 def accept_match(roster, kbm_only=False):
-    roster = convert_usernames_to_ids(roster)
+    try:
+        roster = convert_usernames_to_ids(roster)
+    except KeyError:
+        return [
+            {
+                "name": "**I can't find all of the usernames you entered** :cry:",
+                "value": "[Match finder.](https://gamebattles.majorleaguegaming.com/x-play/black-ops-cold-war/ladder/squads-eu/match-finder)",
+            }
+        ]
 
     matches = find_matches(kbm_only=kbm_only, return_fields=False)
     matches = [match for match in matches if match["players"] == len(roster)]
