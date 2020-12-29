@@ -4,7 +4,7 @@ import discord
 from discord.ext import commands
 
 import jeebee.gb
-from jeebee.log import logger
+from jeebee.utils import build_embed, logger
 
 
 class MatchDetails(commands.Cog):
@@ -15,41 +15,20 @@ class MatchDetails(commands.Cog):
     async def match(self, ctx):
         async with ctx.typing():
             if ctx.invoked_subcommand is None:
-                embed = discord.Embed()
                 response = jeebee.gb.get_current_active_match()
-                for field in response:
-                    embed.add_field(
-                        name=field["name"],
-                        value=field["value"],
-                        inline=field.get("inline", False),
-                    )
-                embed.set_footer(
-                    text="jeebee",
-                    icon_url="https://gamebattles.majorleaguegaming.com/gb-web/assets/favicon.ico",
-                )
+                embed = build_embed(response)
                 await ctx.send(embed=embed)
                 return
 
     @commands.command(name="last-match")
     async def last(self, ctx):
         async with ctx.typing():
-            embed = discord.Embed()
             response = jeebee.gb.get_last_completed_match()
-            for field in response:
-                embed.add_field(
-                    name=field["name"],
-                    value=field["value"],
-                    inline=field.get("inline", False),
-                )
-            embed.set_footer(
-                text="jeebee",
-                icon_url="https://gamebattles.majorleaguegaming.com/gb-web/assets/favicon.ico",
-            )
+            embed = build_embed(response)
         await ctx.send(embed=embed)
 
     @commands.command()
     async def find(self, ctx, *args):
-        embed = discord.Embed()
         async with ctx.typing():
             logger.info(args)
             all_matches = True if "all" in args else False
@@ -57,17 +36,7 @@ class MatchDetails(commands.Cog):
             response = jeebee.gb.find_matches(
                 all_matches=all_matches, kbm_only=kbm_only
             )
-
-            for field in response:
-                embed.add_field(
-                    name=field["name"],
-                    value=field["value"],
-                    inline=field.get("inline", False),
-                )
-            embed.set_footer(
-                text="jeebee",
-                icon_url="https://gamebattles.majorleaguegaming.com/gb-web/assets/favicon.ico",
-            )
+            embed = build_embed(response)
         await ctx.send(embed=embed)
 
     @commands.command(name="win-perc")

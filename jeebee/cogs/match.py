@@ -5,7 +5,7 @@ from discord.ext import commands, tasks
 
 from jeebee.constants import ENV
 import jeebee.gb
-from jeebee.log import logger
+from jeebee.utils import build_embed, logger
 
 
 class Match(commands.Cog):
@@ -29,18 +29,8 @@ class Match(commands.Cog):
                 )
                 return
             else:
-                embed = discord.Embed()
                 match_id, response = jeebee.gb.post_match(roster, kbm_only=kbm_only)
-                for field in response:
-                    embed.add_field(
-                        name=field["name"],
-                        value=field["value"],
-                        inline=field.get("inline", False),
-                    )
-                embed.set_footer(
-                    text="jeebee",
-                    icon_url="https://gamebattles.majorleaguegaming.com/gb-web/assets/favicon.ico",
-                )
+                embed = build_embed(response)
                 self.match_posted = True
                 self.match_posted_id = match_id
                 self.match_posted_ctx = ctx
@@ -59,18 +49,8 @@ class Match(commands.Cog):
                 )
                 return
             else:
-                embed = discord.Embed()
                 response = jeebee.gb.accept_match(args, kbm_only=kbm_only)
-                for field in response:
-                    embed.add_field(
-                        name=field["name"],
-                        value=field["value"],
-                        inline=field.get("inline", False),
-                    )
-                embed.set_footer(
-                    text="jeebee",
-                    icon_url="https://gamebattles.majorleaguegaming.com/gb-web/assets/favicon.ico",
-                )
+                embed = build_embed(response)
                 await ctx.send(embed=embed)
                 return
 
@@ -120,18 +100,8 @@ class Match(commands.Cog):
             if match in ("ACTIVE", "SCHEDULED"):
                 logger.info("Found a match")
                 self.match_posted = False
-                embed = discord.Embed()
                 response = jeebee.gb.get_current_active_match()
-                for field in response:
-                    embed.add_field(
-                        name=field["name"],
-                        value=field["value"],
-                        inline=field.get("inline", False),
-                    )
-                embed.set_footer(
-                    text="jeebee",
-                    icon_url="https://gamebattles.majorleaguegaming.com/gb-web/assets/favicon.ico",
-                )
+                embed = build_embed(response)
                 await self.match_posted_ctx.send(embed=embed)
             else:
                 logger.info("No match found yet")

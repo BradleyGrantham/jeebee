@@ -1,12 +1,12 @@
 import datetime
-from typing import Optional
+from typing import Optional, Iterable
 from pprint import pformat, pprint
 
 import requests
 
 import jeebee.constants
 import jeebee._payloads
-from jeebee.log import logger
+from jeebee.utils import logger
 from jeebee.gb_login import gb_session
 
 
@@ -352,7 +352,7 @@ def convert_usernames_to_ids(roster):
     return roster_ids
 
 
-def post_match(roster: tuple, kbm_only=False):
+def post_match(roster: Iterable, kbm_only=False):
     try:
         roster = convert_usernames_to_ids(roster)
     except KeyError:
