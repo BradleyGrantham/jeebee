@@ -1,5 +1,6 @@
 import datetime
 from typing import Optional
+from pprint import pformat, pprint
 
 import requests
 
@@ -91,7 +92,7 @@ def get_current_active_match(return_status=False):
     current_match = get_matches_from_gb(all_match_pages=False)[0]
     logger.info(f"Match status: {current_match['match']['status']}")
     if return_status:
-        return current_match['match']['status']
+        return current_match["match"]["status"]
 
     if current_match["match"]["status"] in ("COMPLETED", "DISPUTED"):
         return [
@@ -417,6 +418,8 @@ def accept_match(roster, kbm_only=False):
     )
     logger.info(r.content)
     if r.status_code != 200:
+        pprint(f"Status code: {r.status_code}")
+        pprint(r.content)
         return [
             {
                 "name": "**There has been an issue** :cry:",
@@ -439,8 +442,10 @@ def report_last_match(win: bool):
         f"https://gb-api.majorleaguegaming.com/api/v1/matches/{match_id}/report",
         json={"reportTeamStatus": "WON" if win else "LOST"},
     )
+    logger.info(f"Report status code: {r.status_code}")
+    logger.info(pformat(r.content))
     return True if r.status_code == 200 else False
 
 
 if __name__ == "__main__":
-    report_last_match(win=False)
+    accept_match(["ntsfbrad", "jaantr", "jimbob108", "treas1"])

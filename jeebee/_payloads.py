@@ -33,7 +33,7 @@ CHALLENGE_PAYLOAD = {
     "mapsetId": 2318,
 }
 
-ACCEPT_CHALLENGE_PAYLOAD = {"acceptingTeamId": 35286312, "maps": [], "roster": []}
+ACCEPT_CHALLENGE_PAYLOAD = {"acceptingTeamId": GB_TEAM_ID, "maps": [], "roster": []}
 
 
 LOGIN_PAYLOAD = payload = {

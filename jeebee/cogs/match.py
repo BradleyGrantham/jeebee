@@ -70,10 +70,16 @@ class Match(commands.Cog):
     async def report(self, ctx, win):
         self.match_posted = False
         win = True if win in ("w", "win", "wi", "victory", "dub") else False
+        print(f"win: {win}")
         async with ctx.typing():
             response = jeebee.gb.report_last_match(win)
+            from pprint import pprint
+
+            pprint(response)
             if response:
-                await ctx.send("Reported. :slight_smile:")
+                await ctx.send(
+                    f"Reported. {':slight_smile:' if win else ':disappointed'} "
+                )
                 return
             else:
                 await ctx.send("Sorry, it looks like there been an error :cry:")
@@ -85,11 +91,9 @@ class Match(commands.Cog):
         if self.match_posted:
             print("we have a match posted")
             match = jeebee.gb.get_current_active_match(return_status=True)
-            if match in ("PENDING", "ACTIVE", "SCHEDULED"):
+            if match in ("ACTIVE", "SCHEDULED"):
                 print("MATCH FOUND")
                 self.match_posted = False
                 await self.match_posted_ctx.send("FOUND A MATCH")
             else:
                 print("no match found yet")
-
-
