@@ -1,7 +1,10 @@
+from pprint import pprint
+
 import discord
 from discord.ext import commands, tasks
 
 import jeebee.gb
+from jeebee.log import logger
 
 
 class Match(commands.Cog):
@@ -73,12 +76,10 @@ class Match(commands.Cog):
         print(f"win: {win}")
         async with ctx.typing():
             response = jeebee.gb.report_last_match(win)
-            from pprint import pprint
-
             pprint(response)
             if response:
                 await ctx.send(
-                    f"Reported. {':slight_smile:' if win else ':disappointed'} "
+                    f"Reported. {':slight_smile:' if win else ':disappointed:'} "
                 )
                 return
             else:
@@ -89,11 +90,23 @@ class Match(commands.Cog):
     async def check_for_match(self):
         print("checking for match")
         if self.match_posted:
-            print("we have a match posted")
+            logger.info("We have a match posted")
             match = jeebee.gb.get_current_active_match(return_status=True)
             if match in ("ACTIVE", "SCHEDULED"):
-                print("MATCH FOUND")
+                logger.info("Found a match")
                 self.match_posted = False
-                await self.match_posted_ctx.send("FOUND A MATCH")
+                embed = discord.Embed()
+                response = jeebee.gb.get_current_active_match()
+                for field in response:
+                    embed.add_field(
+                        name=field["name"],
+                        value=field["value"],
+                        inline=field.get("inline", False),
+                    )
+                embed.set_footer(
+                    text="jeebee",
+                    icon_url="https://gamebattles.majorleaguegaming.com/gb-web/assets/favicon.ico",
+                )
+                await self.match_posted_ctx.send(embed=embed)
             else:
-                print("no match found yet")
+                logger.info("No match found yet")
