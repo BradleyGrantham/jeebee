@@ -72,7 +72,7 @@ class Match(commands.Cog):
                 return
 
     @commands.command()
-    async def cancel(self, ctx):
+    async def delete(self, ctx):
         async with ctx.typing():
             if not self.match_posted:
                 await ctx.send(
@@ -80,12 +80,12 @@ class Match(commands.Cog):
                 )
                 return
             else:
-                response = jeebee.gb.cancel_match(self.match_posted_id)
+                response = jeebee.gb.delete_match(self.match_posted_id)
                 if response:
                     self.match_posted = False
                     self.match_posted_id = None
                     self.match_posted_ctx = None
-                    await ctx.send(f"Match cancelled :boom:")
+                    await ctx.send(f"Match challenge deleted :boom:")
                     return
                 else:
                     await ctx.send("Sorry, it looks like there been an error :cry:")

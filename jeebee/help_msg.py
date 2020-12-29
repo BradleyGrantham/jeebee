@@ -10,6 +10,10 @@ __**Post a GB Variant; S&D Best of 3**__
 `jeebee post player1 player2 player3`
 - *same caveats as above*
 
+__**Delete a posted match**__
+`jeebee delete`
+- current match on match finder has to have been posted by jeebee
+
 __**Report the last match**__
 `jeebee report win`
 - *anything other than `{"w", "win", "wi", "victory", "dub"}` will be reported as a loss
@@ -24,7 +28,7 @@ __**Show any active matches**__
 `jeebee match`
 
 __**Show last match**__
-`jeebee match last`
+`jeebee last-match`
 
 __**Show win percentage**__
 `jeebee win-perc`

@@ -454,7 +454,7 @@ def report_last_match(win: bool):
     return True if r.status_code == 200 else False
 
 
-def cancel_match(match_id):
+def delete_match(match_id):
     r = gb_session.delete(
         f"https://gb-api.majorleaguegaming.com/api/v1/challenges/{match_id}"
     )
