@@ -8,6 +8,7 @@ class Match(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.match_posted = False
+        self.match_posted_ctx = None
         self.check_for_match.start()
 
     @commands.command()
@@ -34,7 +35,7 @@ class Match(commands.Cog):
                     icon_url="https://gamebattles.majorleaguegaming.com/gb-web/assets/favicon.ico",
                 )
                 self.match_posted = True
-                self.matched_posted
+                self.match_posted_ctx = None
                 await ctx.send(embed=embed)
                 return
 
@@ -79,11 +80,11 @@ class Match(commands.Cog):
                 return
 
     @tasks.loop(seconds=20.0)
-    async def check_for_match(self, ctx):
+    async def check_for_match(self):
         if self.match_posted:
             match = jeebee.gb.get_current_active_match(return_status=True)
             if match in ("PENDING", "ACTIVE"):
                 self.match_posted = False
-                await ctx.send("FOUND A MATCH")
+                await self.match_posted_ctx.send("FOUND A MATCH")
 
 
