@@ -35,7 +35,7 @@ class Match(commands.Cog):
                     icon_url="https://gamebattles.majorleaguegaming.com/gb-web/assets/favicon.ico",
                 )
                 self.match_posted = True
-                self.match_posted_ctx = None
+                self.match_posted_ctx = ctx
                 await ctx.send(embed=embed)
                 return
 
@@ -79,12 +79,17 @@ class Match(commands.Cog):
                 await ctx.send("Sorry, it looks like there been an error :cry:")
                 return
 
-    @tasks.loop(seconds=20.0)
+    @tasks.loop(seconds=8.0)
     async def check_for_match(self):
+        print("checking for match")
         if self.match_posted:
+            print("we have a match posted")
             match = jeebee.gb.get_current_active_match(return_status=True)
-            if match in ("PENDING", "ACTIVE"):
+            if match in ("PENDING", "ACTIVE", "SCHEDULED"):
+                print("MATCH FOUND")
                 self.match_posted = False
                 await self.match_posted_ctx.send("FOUND A MATCH")
+            else:
+                print("no match found yet")
 
 

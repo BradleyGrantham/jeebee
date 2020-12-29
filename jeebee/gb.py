@@ -434,12 +434,13 @@ def accept_match(roster, kbm_only=False):
 
 def report_last_match(win: bool):
     match = get_matches_from_gb(all_match_pages=False)[0]
-    match_id = match["id"]
+    match_id = match["match"]["id"]
     r = gb_session.post(
         f"https://gb-api.majorleaguegaming.com/api/v1/matches/{match_id}/report",
         json={"reportTeamStatus": "WON" if win else "LOST"},
     )
     return True if r.status_code == 200 else False
 
+
 if __name__ == "__main__":
-    print(get_current_active_match(return_status=True))
+    report_last_match(win=False)
