@@ -256,6 +256,13 @@ def find_matches(all_matches=False, kbm_only=True, return_fields=True):
             if "GB Variant: Search & Destroy" in match.get("mapset").get("title", "")
         ]
 
+        # filter any games that arent best of 3
+        available_matches_with_details = [
+            match
+            for match in available_matches_with_details
+            if match["games"] == 3
+        ]
+
         # filter only PC Players Allowed
         available_matches_with_details = [
             match
@@ -306,6 +313,7 @@ def find_matches(all_matches=False, kbm_only=True, return_fields=True):
                 match["mapset"]["title"]
                 .replace("Search & Destroy", "S&D")
                 .replace(" Variant", "")
+                .replace("(3v3+)", "({p}v{p})".format(p=match["players"]))
                 for match in available_matches_with_details
             ),
             "inline": True,
@@ -448,4 +456,4 @@ def report_last_match(win: bool):
 
 
 if __name__ == "__main__":
-    accept_match(["ntsfbrad", "jaantr", "jimbob108", "treas1"])
+    find_matches(kbm_only=False)
