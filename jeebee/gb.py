@@ -86,10 +86,12 @@ def get_match_details(match_id: int):
     return match_details.json()["body"]
 
 
-def get_current_active_match():
+def get_current_active_match(return_status=False):
     """Get the current active match from GameBattles."""
     current_match = get_matches_from_gb(all_match_pages=False)[0]
     logger.info(f"Match status: {current_match['match']['status']}")
+    if return_status:
+        return current_match['match']['status']
 
     if current_match["match"]["status"] in ("COMPLETED", "DISPUTED"):
         return [
@@ -99,7 +101,7 @@ def get_current_active_match():
             }
         ]
 
-    if current_match["match"]["status"] in ("ACTIVE", "PENDING"):
+    if current_match["match"]["status"] in ("ACTIVE", "PENDING", "SCHEDULED"):
 
         match_info = get_match_info(current_match)
 
@@ -438,3 +440,6 @@ def report_last_match(win: bool):
         json={"reportTeamStatus": "WON" if win else "LOST"},
     )
     return True if r.status_code == 200 else False
+
+if __name__ == "__main__":
+    print(get_current_active_match(return_status=True))
