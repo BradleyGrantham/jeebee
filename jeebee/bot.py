@@ -7,7 +7,7 @@ from jeebee.cogs.match_details import MatchDetails
 
 
 if __name__ == "__main__":
-    bot = commands.Bot(command_prefix="jeebee ")
+    bot = commands.Bot(command_prefix=commands.when_mentioned_or("jeebee "))
     bot.remove_command("help")
 
     bot.add_cog(Basic(bot))
