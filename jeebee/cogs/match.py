@@ -12,6 +12,8 @@ class Match(commands.Cog):
         self.bot = bot
         self.match_posted = False
         self.match_posted_ctx = None
+        self.match_posted_id = None
+
         self.check_for_match.start()
 
     @commands.command()
@@ -21,12 +23,13 @@ class Match(commands.Cog):
             roster = [a for a in args if a != "kbm"]
             if len(args) < 3 or len(args) > 4:
                 await ctx.send(
-                    "You need to give me at least 3 (and no more than 4) GameBattles usernames\ne.g. jeebee post ntsfbrad JaAnTr JIMBOB108"
+                    "You need to give me at least 3 (and no more than 4) GameBattles usernames"
+                    "\ne.g. jeebee post ntsfbrad JaAnTr JIMBOB108"
                 )
                 return
             else:
                 embed = discord.Embed()
-                response = jeebee.gb.post_match(roster, kbm_only=kbm_only)
+                match_id, response = jeebee.gb.post_match(roster, kbm_only=kbm_only)
                 for field in response:
                     embed.add_field(
                         name=field["name"],
@@ -38,6 +41,7 @@ class Match(commands.Cog):
                     icon_url="https://gamebattles.majorleaguegaming.com/gb-web/assets/favicon.ico",
                 )
                 self.match_posted = True
+                self.match_posted_id = match_id
                 self.match_posted_ctx = ctx
                 await ctx.send(embed=embed)
                 return
@@ -79,11 +83,31 @@ class Match(commands.Cog):
             pprint(response)
             if response:
                 await ctx.send(
-                    f"Reported. {':slight_smile:' if win else ':disappointed:'} "
+                    f"Reported {':slight_smile:' if win else ':disappointed:'} "
                 )
                 return
             else:
                 await ctx.send("Sorry, it looks like there been an error :cry:")
+                return
+
+    @commands.command()
+    async def cancel(self, ctx):
+        async with ctx.typing():
+            if not self.match_posted:
+                await ctx.send(
+                    f"I don't think you have a match posted currently... :question:"
+                )
+                return
+            else:
+                response = jeebee.gb.cancel_match(self.match_posted_id)
+                if response:
+                    self.match_posted = False
+                    self.match_posted_id = None
+                    self.match_posted_ctx = None
+                    await ctx.send(f"Match cancelled :boom:")
+                    return
+                else:
+                    await ctx.send("Sorry, it looks like there been an error :cry:")
                 return
 
     @tasks.loop(seconds=8.0)

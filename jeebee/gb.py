@@ -258,9 +258,7 @@ def find_matches(all_matches=False, kbm_only=True, return_fields=True):
 
         # filter any games that arent best of 3
         available_matches_with_details = [
-            match
-            for match in available_matches_with_details
-            if match["games"] == 3
+            match for match in available_matches_with_details if match["games"] == 3
         ]
 
         # filter only PC Players Allowed
@@ -358,13 +356,13 @@ def post_match(roster: tuple, kbm_only=False):
     try:
         roster = convert_usernames_to_ids(roster)
     except KeyError:
-        return [
+        return None, [
             {
                 "name": "**I can't find all of the usernames you entered** :cry:",
                 "value": "[Match finder.](https://gamebattles.majorleaguegaming.com/x-play/black-ops-cold-war/ladder/squads-eu/match-finder)",
             }
         ]
-    data = jeebee._payloads.CHALLENGE_PAYLOAD
+    data = jeebee._payloads._TESTING_CHALLENGE_PAYLOAD_ONE_MAN
     data["players"] = len(roster)
     data["roster"] = roster
 
@@ -380,14 +378,14 @@ def post_match(roster: tuple, kbm_only=False):
     )
     logger.info(r.content)
     if r.status_code != 200:
-        return [
+        return r.json()["body"]["id"], [
             {
                 "name": "**There has been an issue** :cry:",
                 "value": "[Match finder.](https://gamebattles.majorleaguegaming.com/x-play/black-ops-cold-war/ladder/squads-eu/match-finder)",
             }
         ]
 
-    return [
+    return None, [
         {
             "name": "**Match posted** :clock230:",
             "value": "[Waiting to be accepted.](https://gamebattles.majorleaguegaming.com/x-play/black-ops-cold-war/ladder/squads-eu/match-finder)",
@@ -455,5 +453,14 @@ def report_last_match(win: bool):
     return True if r.status_code == 200 else False
 
 
+def cancel_match(match_id):
+    r = gb_session.delete(
+        f"https://gb-api.majorleaguegaming.com/api/v1/challenges/{match_id}"
+    )
+    logger.info(f"Report status code: {r.status_code}")
+    logger.info(pformat(r.content))
+    return True if r.status_code == 200 else False
+
+
 if __name__ == "__main__":
-    find_matches(kbm_only=False)
+    post_match(["ntsfbrad"])
