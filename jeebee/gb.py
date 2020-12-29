@@ -377,15 +377,16 @@ def post_match(roster: tuple, kbm_only=False):
         "https://gb-api.majorleaguegaming.com/api/v1/challenges", json=data
     )
     logger.info(r.content)
+    pprint(r.json())
     if r.status_code != 200:
-        return r.json()["body"]["id"], [
+        return None, [
             {
                 "name": "**There has been an issue** :cry:",
                 "value": "[Match finder.](https://gamebattles.majorleaguegaming.com/x-play/black-ops-cold-war/ladder/squads-eu/match-finder)",
             }
         ]
 
-    return None, [
+    return r.json()["body"]["id"], [
         {
             "name": "**Match posted** :clock230:",
             "value": "[Waiting to be accepted.](https://gamebattles.majorleaguegaming.com/x-play/black-ops-cold-war/ladder/squads-eu/match-finder)",
@@ -458,8 +459,7 @@ def cancel_match(match_id):
         f"https://gb-api.majorleaguegaming.com/api/v1/challenges/{match_id}"
     )
     logger.info(f"Report status code: {r.status_code}")
-    logger.info(pformat(r.content))
-    return True if r.status_code == 200 else False
+    return True if r.status_code == 204 else False
 
 
 if __name__ == "__main__":

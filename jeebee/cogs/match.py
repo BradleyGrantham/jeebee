@@ -3,6 +3,7 @@ from pprint import pprint
 import discord
 from discord.ext import commands, tasks
 
+from jeebee.constants import ENV
 import jeebee.gb
 from jeebee.log import logger
 
@@ -21,7 +22,7 @@ class Match(commands.Cog):
         async with ctx.typing():
             kbm_only = True if "kbm" in args else False
             roster = [a for a in args if a != "kbm"]
-            if len(args) < 3 or len(args) > 4:
+            if (len(args) < 3 or len(args) > 4) and ENV != "development" :
                 await ctx.send(
                     "You need to give me at least 3 (and no more than 4) GameBattles usernames"
                     "\ne.g. jeebee post ntsfbrad JaAnTr JIMBOB108"
@@ -52,7 +53,7 @@ class Match(commands.Cog):
             self.match_posted = False
             kbm_only = True if "kbm" in args else False
             roster = [a for a in args if a != "kbm"]
-            if len(roster) < 3 or len(roster) > 4:
+            if (len(roster) < 3 or len(roster) > 4) and ENV != "development":
                 await ctx.send(
                     "You need to give me at least 3 (and no more than 4) GameBattles usernames\ne.g. jeebee accept ntsfbrad JaAnTr JIMBOB108"
                 )
