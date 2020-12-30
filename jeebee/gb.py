@@ -234,6 +234,13 @@ def find_matches(all_matches=False, kbm_only=True, return_fields=True):
 
     del available_matches
 
+    # remove games belong to users team
+    available_matches_with_details = [
+        match
+        for match in available_matches_with_details
+        if not match["doesItBelongToCurrentUsersTeam"]
+    ]
+
     if not all_matches:
         # filter games that are scheduled for later
         available_matches_with_details = [
@@ -362,7 +369,10 @@ def post_match(roster: Iterable, kbm_only=False):
                 "value": "[Match finder.](https://gamebattles.majorleaguegaming.com/x-play/black-ops-cold-war/ladder/squads-eu/match-finder)",
             }
         ]
-    data = jeebee._payloads._TESTING_CHALLENGE_PAYLOAD_ONE_MAN
+    if jeebee.constants.ENV == "development":
+        data = jeebee._payloads._TESTING_CHALLENGE_PAYLOAD_ONE_MAN
+    else:
+        data = jeebee._payloads.CHALLENGE_PAYLOAD
     data["players"] = len(roster)
     data["roster"] = roster
 
@@ -463,4 +473,4 @@ def delete_match(match_id):
 
 
 if __name__ == "__main__":
-    post_match(["ntsfbrad"])
+    m = find_matches(all_matches=True, return_fields=False)
