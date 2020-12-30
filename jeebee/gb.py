@@ -2,8 +2,6 @@ import datetime
 from typing import Optional, Iterable
 from pprint import pformat, pprint
 
-import requests
-
 import jeebee.constants
 import jeebee._payloads
 from jeebee.utils import logger
@@ -12,12 +10,12 @@ from jeebee.gb_login import gb_session
 
 def get_matches_from_gb(all_match_pages: Optional[bool] = True):
     """Get matches for the GameBattles team with id GB_TEAM_ID."""
-    r = requests.get(jeebee.constants.GB_MATCHES_URL.format(page_number=1))
+    r = gb_session.get(jeebee.constants.GB_MATCHES_URL.format(page_number=1))
     matches = r.json()["body"]["records"]
 
     if all_match_pages:
         for page_number in range(2, r.json()["body"]["totalPages"]):
-            r = requests.get(
+            r = gb_session.get(
                 jeebee.constants.GB_MATCHES_URL.format(page_number=page_number)
             )
             matches += r.json()["body"]["records"]
@@ -33,7 +31,7 @@ def get_wins_and_rosters(matches):
     )
     new_matches = []
     for match in matches:
-        match_details = requests.get(
+        match_details = gb_session.get(
             match_details_url.format(match_id=match["match"]["id"])
         ).json()
         new_matches.append({**match, **match_details["body"]})
@@ -81,7 +79,7 @@ def get_win_percentage(n: Optional[int] = None, player: Optional[str] = None):
 
 def get_match_details(match_id: int):
     """Get the raw JSON match details from GameBattles."""
-    match_details = requests.get(
+    match_details = gb_session.get(
         jeebee.constants.GB_MATCH_DETAILS_URL.format(match_id=match_id)
     )
     return match_details.json()["body"]
@@ -221,11 +219,11 @@ def get_match_info(match):
 
 
 def find_matches(all_matches=False, kbm_only=True, return_fields=True):
-    r = requests.get(jeebee.constants.GB_MATCH_FINDER_URL)
+    r = gb_session.get(jeebee.constants.GB_MATCH_FINDER_URL)
     available_matches = r.json()["body"]["records"]
     available_matches_with_details = []
     for i, match in enumerate(available_matches):
-        match_details = requests.get(
+        match_details = gb_session.get(
             jeebee.constants.GB_MATCH_FINDER_DETAILS_URL.format(match_id=match["id"])
         ).json()["body"]
         match_details = {x["name"]: x["value"][0] for x in match_details}
@@ -345,7 +343,7 @@ def find_matches(all_matches=False, kbm_only=True, return_fields=True):
 
 
 def get_team_members():
-    r = requests.get(jeebee.constants.GB_TEAM_MEMBERS_URL)
+    r = gb_session.get(jeebee.constants.GB_TEAM_MEMBERS_URL)
     team_members = r.json()["body"]
     team_members = {player["username"].lower(): player["id"] for player in team_members}
     return team_members
@@ -474,3 +472,4 @@ def delete_match(match_id):
 
 if __name__ == "__main__":
     m = find_matches(all_matches=True, return_fields=False)
+    print("")
