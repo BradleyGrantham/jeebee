@@ -31,9 +31,10 @@ class Match(commands.Cog):
             else:
                 match_id, response = jeebee.gb.post_match(roster, kbm_only=kbm_only)
                 embed = build_embed(response)
-                self.match_posted = True
-                self.match_posted_id = match_id
-                self.match_posted_ctx = ctx
+                if match_id is not None:
+                    self.match_posted = True
+                    self.match_posted_id = match_id
+                    self.match_posted_ctx = ctx
                 await ctx.send(embed=embed)
                 return
 
@@ -45,7 +46,8 @@ class Match(commands.Cog):
             roster = [a for a in args if a != "kbm"]
             if (len(roster) < 3 or len(roster) > 4) and ENV != "development":
                 await ctx.send(
-                    "You need to give me at least 3 (and no more than 4) GameBattles usernames\ne.g. jeebee accept ntsfbrad JaAnTr JIMBOB108"
+                    "You need to give me at least 3 (and no more than 4) GameBattles usernames"
+                    "\ne.g. jeebee accept ntsfbrad JaAnTr JIMBOB108"
                 )
                 return
             else:
