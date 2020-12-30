@@ -304,13 +304,6 @@ def find_matches(all_matches=False, kbm_only=True, return_fields=True):
 
     fields = [
         {
-            "name": ":palm_tree:",
-            "value": "\n".join(
-                str(match["record_num"]) for match in available_matches_with_details
-            ),
-            "inline": True,
-        },
-        {
             "name": "**Game Type**",
             "value": "\n".join(
                 match["mapset"]["title"]
@@ -329,14 +322,10 @@ def find_matches(all_matches=False, kbm_only=True, return_fields=True):
             "inline": True,
         },
         {
-            "name": "Left number shows the position of the match on the match finder",
-            "value": "[GameBattles match finder](https://gamebattles.majorleaguegaming.com/x-play/black-ops-cold-war/ladder/squads-eu/match-finder)",
+            "name": "**Dispute Percentage** :black_joker:",
+            "value": "\n".join(f"{match['disputePercentage']:.2f}%" for match in available_matches_with_details),
+            "inline": True,
         },
-        # {
-        #     "name": "**Dispute Percentage** :",
-        #     "value": "\n".join(f"{match['disputePercentage']:.2f}%" for match in available_matches_with_details),
-        #     "inline": True,
-        # },
     ]
 
     return fields
